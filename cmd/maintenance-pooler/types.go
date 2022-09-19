@@ -44,3 +44,11 @@ type ScheduledEvent struct {
 		DurationInSeconds int      `json:"DurationInSeconds"`
 	} `json:"Events"`
 }
+
+type ConfirmScheduledEvent struct {
+	StartRequests []StartRequest `json:"StartRequests"`
+}
+
+type StartRequest struct {
+	EventID           string   `json:"EventId"`
+}
