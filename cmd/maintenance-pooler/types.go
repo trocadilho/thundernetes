@@ -52,3 +52,9 @@ type ConfirmScheduledEvent struct {
 type StartRequest struct {
 	EventID string `json:"EventId"`
 }
+
+type patchStringValue struct {
+    Op    string `json:"op"`
+    Path  string `json:"path"`
+    Value bool `json:"value"`
+}
