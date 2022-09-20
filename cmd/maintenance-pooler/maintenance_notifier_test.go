@@ -7,7 +7,7 @@ import (
 
 func TestNotifier(t *testing.T) {
 	t.Run("notifier", func(t *testing.T) {
-		node := "aks-agentpool-33482676-vmss000001"
+		node := "aks-agentpool-33482676-vmss000000"
 
 		notifier := NewOutOfClusterKubernetesMaintenanceNotifier(node)
 
