@@ -45,9 +45,12 @@ func (c Checker) Check(ctx context.Context) error {
 	}
 	fmt.Println(scheduledEvent.DocumentIncarnation)
 
-	err = c.notifier.Notify(ctx)
-	if err != nil {
-		return err
+	// TODO: notify only if doc incarnation has changed since last check
+	if len(scheduledEvent.Events) > 0 {
+		err = c.notifier.Notify(ctx)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, event := range scheduledEvent.Events {
