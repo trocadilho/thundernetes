@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 type MockMetadataClient struct {
 	mockedScheduledEvent ScheduledEvent
@@ -16,7 +19,7 @@ func (c MockMetadataClient) ConfirmScheduledEvent(eventId string) (statusCode in
 
 type MockMaintenanceNotifier struct{}
 
-func (n MockMaintenanceNotifier) Notify() error {
+func (n MockMaintenanceNotifier) Notify(ctx context.Context) error {
 	return nil
 }
 
@@ -26,7 +29,7 @@ func Test(t *testing.T) {
 		notifier := MockMaintenanceNotifier{}
 		checker := NewChecker(client, notifier)
 
-		err := checker.Check()
+		err := checker.Check(context.TODO())
 
 		if err != nil {
 			t.Fatalf("not expected")

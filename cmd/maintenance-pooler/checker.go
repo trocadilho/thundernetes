@@ -24,7 +24,7 @@ func (c Checker) Start(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			err := c.Check()
+			err := c.Check(ctx)
 
 			if err != nil {
 				fmt.Println(err.Error())
@@ -35,7 +35,7 @@ func (c Checker) Start(ctx context.Context) {
 	}
 }
 
-func (c Checker) Check() error {
+func (c Checker) Check(ctx context.Context) error {
 	scheduledEvent, err := c.client.GetScheduledEvents()
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (c Checker) Check() error {
 	fmt.Println(scheduledEvent.DocumentIncarnation)
 
 	for _, event := range scheduledEvent.Events {
-		err = c.notifier.Notify()
+		err = c.notifier.Notify(ctx)
 		if err != nil {
 			return err
 		}

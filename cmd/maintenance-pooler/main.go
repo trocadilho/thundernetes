@@ -6,7 +6,7 @@ func main() {
 	context := context.Background()
 
 	metadataClient := NewAzureMetadataClient()
-	notifier := NewKubernetesMaintenanceNotifier()
+	notifier := NewInClusterKubernetesMaintenanceNotifier()
 	checker := NewChecker(metadataClient, notifier)
 
 	checker.Start(context)
