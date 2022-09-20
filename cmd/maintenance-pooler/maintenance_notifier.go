@@ -26,7 +26,7 @@ type KubernetesMaintenanceNotifier struct {
 	nodeName  string
 }
 
-func NewInClusterKubernetesMaintenanceNotifier() MaintenanceNotifier {
+func NewInClusterKubernetesMaintenanceNotifier() KubernetesMaintenanceNotifier {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		panic(err.Error())
@@ -48,7 +48,7 @@ func NewInClusterKubernetesMaintenanceNotifier() MaintenanceNotifier {
 	return k
 }
 
-func NewOutOfClusterKubernetesMaintenanceNotifier(nodeName string) MaintenanceNotifier {
+func NewOutOfClusterKubernetesMaintenanceNotifier(nodeName string) KubernetesMaintenanceNotifier {
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig-cluster", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -75,9 +75,13 @@ func NewOutOfClusterKubernetesMaintenanceNotifier(nodeName string) MaintenanceNo
 	return k
 }
 
+// used for testing
+func (n KubernetesMaintenanceNotifier) GetClientSet() *kubernetes.Clientset {
+	return n.clientset
+}
+
 func (n KubernetesMaintenanceNotifier) Notify(ctx context.Context) error {
-	err := n.uncordonNode(ctx)
-	// err := n.cordonNode(ctx)
+	err := n.UpdateNodeIsUnschedulable(ctx, true)
 	if err != nil {
 		return err
 	}
@@ -104,24 +108,13 @@ func (n KubernetesMaintenanceNotifier) Notify(ctx context.Context) error {
 	return nil
 }
 
-func (n KubernetesMaintenanceNotifier) cordonNode(ctx context.Context) error {
-	// kubectl cordon
+// m.updateNodeIsUnschedulable(ctx, true) = kubectl cordon
+// m.updateNodeIsUnschedulable(ctx, false) = kubectl uncordon
+func (n KubernetesMaintenanceNotifier) UpdateNodeIsUnschedulable(ctx context.Context, value bool) error {
 	payload := []patchStringValue{{
 		Op:    "replace",
 		Path:  "/spec/unschedulable",
-		Value: true,
-	}}
-	payloadBytes, _ := json.Marshal(payload)
-	_, err := n.clientset.CoreV1().Nodes().Patch(ctx, n.nodeName, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})
-	return err
-}
-
-func (n KubernetesMaintenanceNotifier) uncordonNode(ctx context.Context) error {
-	// kubectl cordon
-	payload := []patchStringValue{{
-		Op:    "replace",
-		Path:  "/spec/unschedulable",
-		Value: false,
+		Value: value,
 	}}
 	payloadBytes, _ := json.Marshal(payload)
 	_, err := n.clientset.CoreV1().Nodes().Patch(ctx, n.nodeName, types.JSONPatchType, payloadBytes, metav1.PatchOptions{})

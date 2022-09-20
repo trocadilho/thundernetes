@@ -31,6 +31,9 @@ func (c Checker) Start(ctx context.Context) {
 			}
 		}
 
+		// https://learn.microsoft.com/en-us/azure/virtual-machines/linux/scheduled-events#polling-frequency
+		// Most events have 5 to 15 minutes of advance notice, although in some cases advance notice might be as little as 30 seconds.
+		// To ensure that you have as much time as possible to take mitigating actions, we recommend that you poll the service once per second.
 		time.Sleep(1 * time.Second)
 	}
 }
@@ -42,12 +45,12 @@ func (c Checker) Check(ctx context.Context) error {
 	}
 	fmt.Println(scheduledEvent.DocumentIncarnation)
 
-	for _, event := range scheduledEvent.Events {
-		err = c.notifier.Notify(ctx)
-		if err != nil {
-			return err
-		}
+	err = c.notifier.Notify(ctx)
+	if err != nil {
+		return err
+	}
 
+	for _, event := range scheduledEvent.Events {
 		statusCode, err := c.client.ConfirmScheduledEvent(event.EventID)
 		fmt.Println(statusCode)
 		if err != nil {
